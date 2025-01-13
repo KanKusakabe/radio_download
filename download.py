@@ -24,6 +24,7 @@ class RadioDownloader:
             self.email = config["email"]
             self.password = config["password"]
         
+        # ターゲットのラジオ局のidは下記のurlを参照
         # https://qiita.com/miyama_daily/items/87c7694a10c36a11a96c
         self.target_stations = {
             "TBS": "TBSラジオ",
@@ -33,6 +34,7 @@ class RadioDownloader:
             
         }
         
+        # ここのダウンロードの対象となるキーワードを設定
         self.keywords = [
             "オールナイトニッポン",
             "爆笑問題カーボーイ",
@@ -45,18 +47,12 @@ class RadioDownloader:
             "マイナビ Laughter Night",            
         ]
 
-        # サムネイル画像の設定
-        self.thumbnails = {
-            "オールナイトニッポン": "ann.jpg",
-            "カーボーイ": "cowboy.jpg",
-            "メガネびいき": "megane.jpg"
-        }
-
     def file_exists(self, filename):
         """ファイルが既に存在するかチェック"""
-        # ファイルの場所は，カレントディレクトリか，"../Music/{artist}/{artist}/"に保存される
+        # ファイルの場所は，カレントディレクトリか，"../Music/.../"に保存される
         if os.path.exists(f"{filename}.mp3"):
             return True
+        # ../Music/ に保存されているか確認
         for root, dirs, files in os.walk("../Music"):
             if f"{filename}.mp3" in files:
                 return True
