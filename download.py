@@ -11,6 +11,14 @@ class RadioDownloader:
     def __init__(self):
         self.authkey = 'bcd151073c03b352e1ef2fd66c32209da9ca0afa'
         # config.jsonから読み込む
+        """
+        このファイルと同じ階層に"config.json"というファイルが必要
+        下記のようなファイルを想定している
+        {
+        "email": "radikoに登録したメールアドレス",
+        "password": "radikoに登録したパスワード"
+        }
+        """
         with open("config.json") as f:
             config = json.load(f)
             self.email = config["email"]
