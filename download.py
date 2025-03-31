@@ -30,8 +30,10 @@ class RadioDownloader:
             "TBS": "TBSラジオ",
             "LFR": "ニッポン放送",
             "MBS": "MBSラジオ",
-            "OBCラジオ大阪": "OBC",
-            
+            "OBC":"OBCラジオ大阪",
+            "FMT": "TOKYOエフエム",
+            "RADIOBERRY": "RADIOBERRY",    
+            "KNB": "KNBラジオ",
         }
         
         # ここのダウンロードの対象となるキーワードを設定
@@ -44,8 +46,25 @@ class RadioDownloader:
             "空気階段の踊り場",
             "山里亮太の不毛な議論",
             "ハライチのターン！",
-            "マイナビ Laughter Night",            
+            "マイナビ Laughter Night",
+            "サクラバシ919",
+            "TOKYO SPEAKEASY",
+            # "森本毅郎",
+            "有吉弘行のSUNDAY",
+            "ランジャタイによりますと",
         ]
+        
+        # 対象となるアーティスト名
+        self.artist = [
+            "カネコアヤノ", 
+            "神田伯山"
+        ]
+        
+        # 例外的な番組名を設定
+        self.exception_programs = {
+                        "OBC": ["オールナイトニッポン"],
+                        "KNB": ["オールナイトニッポン", "空気階段の踊り場", "ハライチのターン！", "アルコ＆ピース"],
+                    }
 
     def file_exists(self, filename):
         """ファイルが既に存在するかチェック"""
@@ -143,6 +162,7 @@ class RadioDownloader:
                 return thumbnail_filename
         except Exception as e:
             print(f"Error downloading thumbnail: {e}")
+            return None
         
         return None
 
@@ -152,7 +172,9 @@ class RadioDownloader:
             print("Authentication failed")
             return
 
-        filename = f"{program['title']}-{date}"
+        if program['personality'] is None:
+            program['personality'] = "unknown"
+        filename = f"{program['title']}-{date}-{program['personality'].replace('/', '_')}"
         
         # 既にファイルが存在する場合はスキップ
         if self.file_exists(filename):
@@ -207,6 +229,7 @@ class RadioDownloader:
                 title = prog.xpath("title")[0].text
                 ft = prog.attrib["ft"]
                 to = prog.attrib["to"]
+                personality = prog.xpath("pfm")[0].text
                 
                 # img要素があれば取得
                 img_url = None
@@ -215,16 +238,24 @@ class RadioDownloader:
                     img_url = img_elements[0].text
                 
                 # キーワードが番組タイトルに含まれているかチェック
-                if any(keyword in title for keyword in self.keywords):
+                if any(keyword in title for keyword in self.keywords) or any(artist in personality for artist in self.artist):
+
                     # 「オールナイトニッポン」は，「オールナイトニッポンX」を含むため，この場合はスキップ
                     if any(key in title for key in ["オールナイトニッポンGOLD", "オールナイトニッポンX", "オールナイトニッポンサタデースペシャル"]):
                         continue
+                    # 例外的な番組名の場合はスキップ
+                    elif station_id in self.exception_programs:
+                        if any(key in title for key in self.exception_programs[station_id]):
+                            continue
+                    # titleからスペースを削除
+                    title = title.replace(" ", "")
                     programs.append({
                         'title': title,
                         'ft': ft,
                         'to': to,
                         'station_id': station_id,
-                        'img_url': img_url
+                        'img_url': img_url,
+                        'personality': personality
                     })
             
             return programs
@@ -245,10 +276,9 @@ class RadioDownloader:
                 for station_id in self.target_stations.keys():
                     programs = self.get_programs(date, station_id)
                     
-                    # programsをprintして確認
-                    for p in programs:
-                        print(f"{station_id=}, {date=}", {p['title']}, {p['ft']}, {p['to']})
-                    # print(f"{station_id=}, {date=}", {p['title'] for p in programs})
+                    # # programsをprintして確認
+                    # for p in programs:
+                    #     print(f"{station_id=}, {date=}", {p['title']}, {p['ft']}, {p['to']}, {p['personality']})
                     
                     for program in programs:
                         # programが空だったらスキップ

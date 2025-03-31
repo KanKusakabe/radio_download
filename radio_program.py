@@ -22,7 +22,10 @@ def main():
 		"TBSラジオ": "TBS",
 		"ニッポン放送": "LFR",
 		"ラジオ大阪": "OBC",
+		"TOKYOエフエム": "FMT",
 		"MBSラジオ": "MBS",
+		"RADIO BERRY": "RADIOBERRY",
+		"KNBラジオ": "KNB"
 	}
 	
 	# 標準入力から放送局を番号で選択し，さらに，過去何日ぶんの番組表を取得するかを入力
